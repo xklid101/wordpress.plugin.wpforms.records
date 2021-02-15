@@ -1,22 +1,28 @@
 <?php
 
+use Xklid101\Wprecords\Services\Config;
+use Xklid101\Wprecords\Services\Database;
+
 // if uninstall.php is not called by WordPress, die
 if (!defined('WP_UNINSTALL_PLUGIN')) {
     die;
 }
 
-$option_name = 'xklid101_wprecords';
+$option_name = Config::CONFIG_PARAM_NAME;
 
 delete_option($option_name);
 
 // for site options in Multisite
-delete_site_option($option_name);
+// delete_site_option($option_name);
 
 // drop a custom database table
 global $wpdb;
-$tbls = $wpdb->get_col("SHOW TABLES LIKE '{$wpdb->prefix}xklid101_wprecords%'");
+$tbls = $wpdb->get_col("SHOW TABLES LIKE '{$wpdb->prefix}" . Database::TBL_PREFIX . "%'");
+var_dump($tbls);
+exit;
+
 if ($tbls) {
     foreach ($tbls as $tbl) {
-        $wpdb->query("DROP TABLE IF EXISTS {$tbl}");
+        $wpdb->query("DROP TABLE IF EXISTS `{$tbl}`");
     }
 }

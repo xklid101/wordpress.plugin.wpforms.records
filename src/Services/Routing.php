@@ -14,20 +14,12 @@ class Routing
     private $container;
 
     /**
-     * Filesystem path to the src directory
-     * @var string
-     */
-    private string $baseSrcDir;
-
-    /**
      * Class constructor
      *
      * @param Container $container  [description]
-     * @param string $baseSrcDir The main src directory
      */
-    public function __construct(Container $container, string $baseSrcDir) {
+    public function __construct(Container $container) {
         $this->container = $container;
-        $this->baseSrcDir = $baseSrcDir;
     }
 
     public function getPluginCurrentUrlPage(): string
@@ -37,7 +29,7 @@ class Routing
         ]);
     }
 
-    public function isSubpage($name)
+    public function isSubpage($name): bool
     {
         return ($_GET['subpage'] ?? '') === $name;
     }
@@ -52,12 +44,12 @@ class Routing
         );
     }
 
-    private function isPluginUrl()
+    private function isPluginUrl(): bool
     {
         return ($_GET['page'] ?? '') === $this->getSlug();
     }
 
-    public function getSlug()
+    public function getSlug(): string
     {
         return 'xklid101-forms-records';
     }
@@ -67,9 +59,9 @@ class Routing
         if ($this->isPluginUrl()) {
             switch ($_GET['subpage'] ?? '--unset--') {
                 case 'records':
-                    return $this->container->get(AdminRecords::class, $this->baseSrcDir);
+                    return $this->container->get(AdminRecords::class);
                 case 'config':
-                    return $this->container->get(AdminConfig::class, $this->baseSrcDir);
+                    return $this->container->get(AdminConfig::class);
                 case '--unset--':
                     wp_safe_redirect(
                         $this->getPluginUrl(
@@ -89,7 +81,7 @@ class Routing
          * (controllers are loaded on all wordpress init, not just subpage...)
          * we have to return some default controller every time
          */
-        return $this->container->get(AdminRecords::class, $this->baseSrcDir);
+        return $this->container->get(AdminRecords::class);
     }
 }
 
