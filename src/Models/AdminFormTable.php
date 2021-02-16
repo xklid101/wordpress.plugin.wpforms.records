@@ -76,11 +76,30 @@ class AdminFormTable extends WP_List_Table
         foreach ($colsSpec as $key => $value) {
             $cols[$key] = $value;
         }
+        $colsVar = [];
         foreach ($dbCols as $dbCol) {
             $dbCol = (string) $dbCol;
             if (isset($formFields[$dbCol])) {
-                $cols[$this->getColNameFromDbCol($dbCol)] = $formFields[$dbCol];
+                $colsVar[$this->getColNameFromDbCol($dbCol)] = $formFields[$dbCol];
             }
+        }
+
+        /**
+         * mysql help to sort better
+         */
+        $wpdb = $this->db->getDb();
+        $wpdb->query("
+            CREATE TEMPORARY TABLE tmp (
+                `key` text NOT NULL,
+                `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_cs_0900_ai_ci DEFAULT NULL
+            )
+        ");
+        foreach ($colsVar as $key => $value) {
+            $wpdb->insert('tmp', ['key' => $key, 'value' => $value]);
+        }
+        $resColsVarsSorted = $wpdb->get_results("SELECT * FROM tmp ORDER BY value ASC");
+        foreach ($resColsVarsSorted as $values) {
+            $cols[$values->key] = $values->value;
         }
 
         $this->columns = $cols;

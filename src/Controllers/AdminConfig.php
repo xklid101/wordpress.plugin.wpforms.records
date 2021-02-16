@@ -47,6 +47,7 @@ class AdminConfig
             }
             $i++;
         }
+
         $config = $this->config->getWp();
         $this->template->render(
             'adminConfig',

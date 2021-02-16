@@ -8,6 +8,10 @@ class Config
 {
     const CONFIG_PARAM_NAME = 'xklid101_wprecords';
 
+    const ERRORMSG_FORM_MAXCOUNT_DEFAULT = 'Formulář již nelze odeslat! Počet záznamů dosáhl maxima!';
+    const ERRORMSG_FIELD_MAXCOUNT_DEFAULT = 'Formulář již nelze odeslat! Počet unikátních záznamů pro toto pole dosáhl maxima!';
+    const ERRORMSG_FIELD_REQGROUP_DEFAULT = 'Alespoň jedno pole musí být vyplněno!';
+
     private $config;
 
     public function __construct(
