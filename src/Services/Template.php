@@ -49,7 +49,7 @@ class Template
         })->render($viewName, $params);
     }
 
-    public function flashMessage($message, $type)
+    public function flashMessage($message, $type = 'info')
     {
         if (!in_array($type, ['error', 'warning', 'success', 'info'])) {
             $type = 'info';

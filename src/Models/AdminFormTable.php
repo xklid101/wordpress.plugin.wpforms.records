@@ -39,8 +39,10 @@ class AdminFormTable extends WP_List_Table
 
     public function column_cb($item)
     {
+        // var_dump($item);
         return sprintf(
-            '<input type="checkbox" name="record[]" value="%s" />', $item['__id'] ?? ''
+            '<input type="checkbox" name="ids[]" value="%s" />',
+            $item['__id'] ?? ''
         );
     }
 
@@ -54,7 +56,10 @@ class AdminFormTable extends WP_List_Table
         $dbCols = $this->db->getColumns($this->getId());
         $colsSpec = [
             'cb' => '<input type="checkbox" />',
-            '__note' => __('Poznámka')
+            $this->getColNameFromDbCol('__id') => 'Id',
+            $this->getColNameFromDbCol('__time_add') => __('Datum'),
+            $this->getColNameFromDbCol('__url') => __('Stránka'),
+            $this->getColNameFromDbCol('__note') => __('Poznámka')
         ];
         $formFields = [];
         foreach ($formsList as $value) {
@@ -74,12 +79,22 @@ class AdminFormTable extends WP_List_Table
         foreach ($dbCols as $dbCol) {
             $dbCol = (string) $dbCol;
             if (isset($formFields[$dbCol])) {
-                $cols['col_' . $dbCol] = $formFields[$dbCol];
+                $cols[$this->getColNameFromDbCol($dbCol)] = $formFields[$dbCol];
             }
         }
 
         $this->columns = $cols;
         return $this->columns;
+    }
+
+    private function getColNameFromDbCol($dbCol): string
+    {
+        return 'col_' . $this->getId() . '_' . $dbCol;
+    }
+
+    private function getDbColFromColName($colName): string
+    {
+        return str_replace('col_' . $this->getId() . '_', '', $colName);
     }
 
     public function ajax_user_can()
@@ -97,7 +112,10 @@ class AdminFormTable extends WP_List_Table
             if ($value === 'cb') {
                 continue;
             }
-            $cols[$value] = str_replace('col_', '', $value);
+            $cols[$value] = [
+                $this->getDbColFromColName($value),
+                false
+            ];
         }
         return $cols;
     }
@@ -115,67 +133,82 @@ class AdminFormTable extends WP_List_Table
 
     public function column_default($item, $colName)
     {
-        return $item[str_replace('col_', '', $colName)] ?? '';
+        $dbCol = $this->getDbColFromColName($colName);
+        switch ($dbCol) {
+            case '__id':
+                return $item[$dbCol];
+            case '__time_add':
+                return $item[$dbCol]
+                    ? date('j.n.Y', strtotime($item[$dbCol]))
+                        . ' <small>(' . date('H:i', strtotime($item[$dbCol]))
+                        . ')</small>'
+                    : '';
+            case '__url':
+                return $item[$dbCol]
+                    ? '<a href="' . esc_attr($item[$dbCol]) . '" title="' . esc_attr($item[$dbCol]) . '" target="_blank">'
+                        . '...' . esc_html(substr($item[$dbCol], -30))
+                        . '</a>'
+                    : '';
+            default:
+                return '<div class="read">
+                            ' . esc_html($item[$dbCol]) . '
+                        </div>
+                        <div class="edit" style="display: none">
+                            <textarea
+                                name="edit[' . $item['__id'] . '][' . $dbCol . ']"
+                            >'
+                                . esc_textarea($item[$dbCol])
+                            . '</textarea>
+                        </div>';
+                break;
+        }
     }
 
     public function get_bulk_actions()
     {
-        $actions = ['bulk-delete' => 'Delete'];
+        $actions = [
+            'bulk-delete' => __('Delete')
+        ];
         return $actions;
     }
 
-    public function process_bulk_action()
-    {
-        // Detect when a bulk action is being triggered...
-        // if ('delete' === $this->current_action()) {
-        //     // In our file that handles the request, verify the nonce.
-        //     $nonce = esc_attr($_REQUEST['_wpnonce']);
-        //     if (!wp_verify_nonce($nonce, 'bx_delete_records')) {
-        //         die('Nonce not verified!');
-        //     }
-        //     else {
-        //         $this->delete_records(absint($_GET['record']));
-        //         $redirect = admin_url('admin.php?page=codingbin_records');
-        //         wp_redirect($redirect);
-        //         exit;
-        //     }
-        // }
+    // public function processAction()
+    // {
+    //     if (strtolower($_SERVER['REQUEST_METHOD'] ?? '') !== 'post') {
+    //         return;
+    //     }
 
-        // // If the delete bulk action is triggered
-        // if ((isset($_POST['action']){
-        //     $_POST['action'] == 'bulk-delete') || (isset($_POST['action2']) & amp; & amp;
-        //     $_POST['action2'] == 'bulk-delete')) {
-        //     $delete_ids = esc_sql($_POST['bulk-delete']);
-        //     // loop over the array of record IDs and delete them
-        //     foreach($delete_ids as $id) {
-        //         self::delete_records($id);
-        //     }
-
-        //     $redirect = admin_url('admin.php?page=codingbin_records');
-        //     wp_redirect($redirect);
-        //     exit;
-        //     exit;
-        // }
-    }
+    //     $nonce = $_REQUEST['_wpnonce'];
+    //     if (!wp_verify_nonce($nonce, 'bulkx-' . $this->_args['plural'])) {
+    //         $this->template->flashMessage('Nonce not verified!', 'error');
+    //         // wp_die('Nonce not verified!');
+    //         return;
+    //     }
+    //     if (isset($_POST['asubmit-all-changes'])) {
+    //         # code...
+    //     } else if ($this->current_action() === 'bulk-deletex') {
+    //         $this->deleteRecords($_POST['ids'] ?? []);
+    //     }
+    // }
     /**
-    * Delete a record record.
-    * * @param int $id customer ID
+    * Delete a records
+    * * @param array $ids records ids
     */
-    public static function delete_records($id)
-    {
-        // global $wpdb;
-        // $wpdb->delete("custom_records", ['id' => $id], ['%d']);
-    }
+    // private function deleteRecords(array $ids)
+    // {
+    //     $wpdb = $this->db->getDb();
+    //     $tbl = $this->db->getFormTable($this->getId());
+    //     foreach ($ids as $id) {
+    //         $wpdb->delete($tbl, ['__id' => $id], ['%d']);
+    //     }
+    // }
 
     public function prepare_items()
     {
         $this->_column_headers = $this->get_column_info();
 
-        $this->process_bulk_action();
-        /**
-         * @todo - fix: not working with predefined option (in Loader)
-         *  like here https://wpengineer.com/2426/wp_list_table-a-step-by-step-guide/
-         */
+        // $this->processAction();
+
         $perpage = $this->get_items_per_page(AdminFormTableFactory::OPTION_PER_PAGE);
 
         $wpdb = $this->db->getDb();
@@ -185,7 +218,7 @@ class AdminFormTable extends WP_List_Table
             if ($value === 'cb') {
                 continue;
             }
-            $sels[] = "`" . str_replace('col_', '', $value) . "`";
+            $sels[] = "`" . $this->getDbColFromColName($value) . "`";
         }
         $query = "SELECT " . implode(',', $sels) . " FROM {$tbl}";
 
@@ -196,7 +229,7 @@ class AdminFormTable extends WP_List_Table
                 if ($value === 'cb') {
                     continue;
                 }
-                $search[] = '`' . str_replace('col_', '', $value) . '` LIKE %s';
+                $search[] = '`' . $this->getDbColFromColName($value) . '` LIKE %s';
                 $queryParams[] = '%' . $_REQUEST['s'] . '%';
             }
         }
@@ -206,7 +239,7 @@ class AdminFormTable extends WP_List_Table
 
         $orderby = in_array(($_GET['orderby'] ?? ''), $this->get_sortable_columns(), true)
             ? $_GET['orderby'] : $this->get_primary_column_name();
-        $order = strtolower($_GET["order"] ?? '') === 'desc' ? 'DESC' : 'ASC';
+        $order = strtolower($_GET["order"] ?? '') === 'asc' ? 'ASC' : 'DESC';
 
         $query .= ' ORDER BY `' . $orderby . '` ' . $order;
 

@@ -34,6 +34,13 @@ class Loader
                 'admin_menu',
                 [$this, 'addAdminSubMenuPage']
             );
+
+            add_filter(
+                'set-screen-option',
+                [$this->container->get(AdminFormTableFactory::class), 'setScreenOption'],
+                10,
+                3
+            );
         }
 
         /**
@@ -90,8 +97,8 @@ class Loader
                         add_screen_option(
                             'per_page',
                             [
-                                'label' => __('Záznamů na stránku'),
-                                'default' => 15,
+                                // 'label' => __('Záznamů na stránku'),
+                                'default' => 99,
                                 'option' => AdminFormTableFactory::OPTION_PER_PAGE
                             ]
                         );

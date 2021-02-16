@@ -108,6 +108,9 @@ class FrontForm
 
             $toInsert[$fieldId] = $colValue;
         }
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            $toInsert['__url'] = $_SERVER['HTTP_REFERER'];
+        }
         if ($toInsert) {
             $wpdb->insert($tbl, $toInsert);
         }

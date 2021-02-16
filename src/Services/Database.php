@@ -43,6 +43,7 @@ class Database
                 `__time_add` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `__time_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `__note` text NULL,
+                `__url` text NULL,
                 PRIMARY KEY (`__id`)
             )
 

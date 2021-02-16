@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Xklid101\Wprecords\Services;
 
-use Xklid101\Wprecords\Services\Database;
 use Xklid101\Wprecords\Models\AdminFormTable;
 use Xklid101\Wprecords\Services\Config;
 use WPForms\WPForms;
@@ -45,6 +44,24 @@ class AdminFormTableFactory
             $id
         );
         return $this->stack[$idx];
+    }
+
+    /**
+     * handles table page prefs
+     *
+     * @param mixed  $status
+     * @param string $option The screen option name
+     * @param mixed  $value
+     *
+     * @return mixed
+     */
+    public function setScreenOption($status, $option, $value)
+    {
+        if ($option === AdminFormTableFactory::OPTION_PER_PAGE) {
+            return $value;
+        }
+
+        return $status;
     }
 }
 

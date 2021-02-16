@@ -27,6 +27,17 @@
     </div>
 
     <?php if ($formTableSelected): ?>
+        <form method="post" action="<?php echo esc_attr($routing->getPluginCurrentUrlPage()) ?>">
+            <div>
+                <input
+                    type="submit"
+                    class="button button-default"
+                    name="export-all-table"
+                    value="<?php echo __('Export celé tabulky') ?>"
+                />
+                <input type="hidden" name="id" value="<?php echo esc_attr($_GET['formid'] ?? '') ?>">
+            </div>
+        </form>
         <form method="get">
             <div>
                 <input type="hidden" name="page" value="<?php echo esc_attr($routing->getSlug()) ?>">
@@ -35,21 +46,53 @@
                 <?php $formTableSelected->search_box(__('hledat'), 'xklid101-wprecords-search-box'); ?>
             </div>
         </form>
-        <?
-        /**
-         * @todo  - implement the form with bulk actions and fast row edit etc..?
-         *            @see  https://codingbin.com/display-custom-table-data-wordpress-admin/ for hints
-         */
-        ?>
         <form method="post" action="<?php echo esc_attr($routing->getPluginCurrentUrlPage()) ?>">
-            <div>
+            <div id="xklid101-form-table-selected">
                 <?php $formTableSelected->display() ?>
             </div>
             <input type="hidden" name="id" value="<?php echo esc_attr($formTableSelected->getId()) ?>">
             <div style="margin: 10px; padding: 10px; border-top: 1px solid #ababab">
-                <button type="submit" class="button button-primary">
-                    <?php echo __('Uložit změny') ?>
+                <button
+                    type="button"
+                    class="button button-default"
+                    onclick="
+                        this.style.display = 'none';
+                        this.nextElementSibling.style.display = '';
+                        document.querySelectorAll('#xklid101-form-table-selected .read').forEach(function(item) {
+                            item.style.display = 'none';
+                        });
+                        document.querySelectorAll('#xklid101-form-table-selected .edit').forEach(function(item) {
+                            item.style.display = '';
+                        });
+                    "
+                >
+                    <?php echo __('Upravit záznamy') ?>
                 </button>
+                <div style="display: none">
+                    <input
+                        type="submit"
+                        name="submit-all-changes"
+                        value="<?php echo __('Uložit změny') ?>"
+                        class="button button-primary"
+                    >
+                    &emsp;
+                    <button
+                        type="button"
+                        class="button button-default"
+                        onclick="
+                            this.closest('div').style.display = 'none';
+                            this.closest('div').previousElementSibling.style.display = '';
+                            document.querySelectorAll('#xklid101-form-table-selected .edit').forEach(function(item) {
+                                item.style.display = 'none';
+                            });
+                            document.querySelectorAll('#xklid101-form-table-selected .read').forEach(function(item) {
+                                item.style.display = '';
+                            });
+                        "
+                    >
+                        <?php echo __('Zrušit') ?>
+                    </button>
+                </div>
             </div>
         </form>
     <?php endif; ?>
