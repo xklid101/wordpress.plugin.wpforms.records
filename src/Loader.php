@@ -9,6 +9,7 @@ use RuntimeException;
 use Xklid101\Wprecords\Di\Container;
 use Xklid101\Wprecords\Services\Routing;
 use Xklid101\Wprecords\Services\FrontForm;
+use Xklid101\Wprecords\Services\AdminFormTableFactory;
 
 
 class Loader
@@ -73,6 +74,29 @@ class Loader
                 add_action(
                     'load-' . $hook,
                     array($this->getRouting()->getAdminController(), 'submit')
+                );
+            }
+
+            if ($this->getRouting()->isPluginUrl() && ($_GET['formid'] ?? '')) {
+                /**
+                 * Adding the checkboxes for hiding/showing the columns is done by WordPress automatically.
+                 * You just have to make sure that your derived class is instantiated
+                 * before the screen option panel is rendered so that the parent class can retrieve the column names.
+                 * To accomplish this the corresponding code is moved into the method add_options():
+                 */
+                add_action(
+                    'load-' . $hook,
+                    function() {
+                        add_screen_option(
+                            'per_page',
+                            [
+                                'label' => __('Záznamů na stránku'),
+                                'default' => 15,
+                                'option' => AdminFormTableFactory::OPTION_PER_PAGE
+                            ]
+                        );
+                        $this->container->get(AdminFormTableFactory::class)->create($_GET['formid']);
+                    }
                 );
             }
         } catch (RuntimeException $e) {

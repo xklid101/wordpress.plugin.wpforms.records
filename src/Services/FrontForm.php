@@ -33,7 +33,10 @@ class FrontForm
         /**
          * check all form records maxcount option
          */
-        $maxCountAll = (int) $config[$formId]['maxcount'] ?? -1;
+        $maxCountAll = isset($config[$formId]['maxcount'])
+            ? (int) $config[$formId]['maxcount']
+            : -1;
+
         if ($maxCountAll >= 0) {
             $count = $wpdb->get_var(
                 $wpdb->prepare(
@@ -65,7 +68,10 @@ class FrontForm
             /**
              * check field records maxcount option
              */
-            $maxCountField = (int) $config[$formId]['fields'][$fieldId]['maxcount'] ?? -1;
+            $maxCountField = isset($config[$formId]['fields'][$fieldId]['maxcount'])
+                ? (int) $config[$formId]['fields'][$fieldId]['maxcount']
+                : -1;
+
             if ($maxCountField >= 0) {
                 $count = $wpdb->get_var(
                     $wpdb->prepare(

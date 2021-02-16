@@ -49,6 +49,34 @@ class Database
         ");
     }
 
+    public function getColumns($formId, $repeatIfEmpty = true)
+    {
+        $tbl = $this->getFormTable($formId);
+        $wpdb = $this->getDb();
+
+        $cols = $wpdb->get_col(
+            $wpdb->prepare(
+                "
+                    SELECT `column_name`
+                    FROM information_schema.columns
+                    WHERE table_schema = %s
+                    AND table_name = %s
+                ",
+                [
+                    $wpdb->dbname,
+                    $tbl
+                ]
+
+            )
+        );
+        if (!$cols && $repeatIfEmpty) {
+            $this->createTable($formId);
+            return $this->getColumns($formId, false);
+        }
+
+        return $cols ?: [];
+    }
+
     /**
      * add column for formId if not exists
      *

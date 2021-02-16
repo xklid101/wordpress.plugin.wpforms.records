@@ -22,16 +22,29 @@ class Routing
         $this->container = $container;
     }
 
-    public function getPluginCurrentUrlPage(): string
+    public function getPluginCurrentUrlPage(array $params = []): string
     {
-        return $this->getPluginUrl([
-            'subpage' => $_GET['subpage'] ?? ''
-        ]);
+        $paramsDefault = [];
+        if (isset($_GET['subpage'])) {
+            $paramsDefault['subpage'] = $_GET['subpage'];
+        }
+        if (isset($_GET['formid'])) {
+            $paramsDefault['formid'] = $_GET['formid'];
+        }
+
+        return $this->getPluginUrl(
+            array_merge($paramsDefault, $params)
+        );
     }
 
     public function isSubpage($name): bool
     {
-        return ($_GET['subpage'] ?? '') === $name;
+        return ($this->getSubpage()) === $name;
+    }
+
+    public function getSubpage(): string
+    {
+        return $_GET['subpage'] ?? '';
     }
 
     public function getPluginUrl(array $params = []): string
@@ -44,7 +57,7 @@ class Routing
         );
     }
 
-    private function isPluginUrl(): bool
+    public function isPluginUrl(): bool
     {
         return ($_GET['page'] ?? '') === $this->getSlug();
     }

@@ -4,7 +4,7 @@
         <?php include 'adminNavigation.php' ?>
     </div>
 
-    <form action="" method="post">
+    <form action="<?php echo esc_attr($routing->getPluginCurrentUrlPage()) ?>" method="post">
     <?php foreach ($formsData as $value): ?>
         <div style="margin: 10px; padding: 10px; border-top: 1px solid #ababab">
             <h3>
