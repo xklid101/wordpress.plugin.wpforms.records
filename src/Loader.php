@@ -43,6 +43,20 @@ class Loader
             );
         }
 
+        add_action(
+            'wpforms_frontend_output_form_after',
+            [$this->container->get(FrontForm::class), 'disableSubmitByJs'],
+            10,
+            2
+        );
+
+        add_filter(
+            'wpforms_field_properties',
+            [$this->container->get(FrontForm::class), 'getDisabledFieldsPropsBefore'],
+            10,
+            3
+        );
+
         /**
          * wpform save actions seems to be sending to the admin part
          * so better to register filter/action everytime
