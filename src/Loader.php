@@ -28,7 +28,6 @@ class Loader
 
     public function loadPlugin()
     {
-        /* General Administration functions */
         if (is_admin()) {
             add_action(
                 'admin_menu',
@@ -57,10 +56,6 @@ class Loader
             3
         );
 
-        /**
-         * wpform save actions seems to be sending to the admin part
-         * so better to register filter/action everytime
-         */
         add_filter(
             'wpforms_process_initial_errors',
             [$this->container->get(FrontForm::class), 'getErrors'],
