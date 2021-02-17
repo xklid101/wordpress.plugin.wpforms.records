@@ -91,7 +91,7 @@ class AdminFormTable extends WP_List_Table
         $wpdb->query("
             CREATE TEMPORARY TABLE tmp (
                 `key` text NOT NULL,
-                `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_cs_0900_ai_ci DEFAULT NULL
+                `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci DEFAULT NULL
             )
         ");
         foreach ($colsVar as $key => $value) {
