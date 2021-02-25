@@ -256,8 +256,10 @@ class AdminFormTable extends WP_List_Table
             $query .= ' WHERE ' . implode(' OR ', $search);
         }
 
-        $orderby = in_array(($_GET['orderby'] ?? ''), $this->get_sortable_columns(), true)
-            ? $_GET['orderby'] : $this->get_primary_column_name();
+        $sortableColumns = $this->get_sortable_columns();
+        $orderby = isset($sortableColumns[$this->getColNameFromDbCol($_GET['orderby'] ?? '')])
+            ? $_GET['orderby']
+            : $this->get_primary_column_name();
         $order = strtolower($_GET["order"] ?? '') === 'asc' ? 'ASC' : 'DESC';
 
         $query .= ' ORDER BY `' . $orderby . '` ' . $order;
